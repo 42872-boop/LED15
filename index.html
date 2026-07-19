@@ -8,7 +8,7 @@
         :root {
             --neon: #00f0ff;
             --neon-dim: rgba(0, 240, 255, 0.2);
-            --bg-glass: rgba(6, 7, 13, 0.6);
+            --bg-glass: rgba(6, 7, 13, 0.75);
             --border-glass: rgba(255, 255, 255, 0.08);
         }
 
@@ -27,7 +27,7 @@
             overflow: hidden;
         }
 
-        /* Full Screen Webcam Wrapper */
+        /* FIXED: Full Screen Webcam Wrapper allows elements to size contextually */
         #webcam-container {
             position: absolute;
             top: 0;
@@ -35,12 +35,18 @@
             width: 100vw;
             height: 100vh;
             z-index: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #020205;
         }
 
-        #webcam-container canvas {
+        /* FIXED: Ensures the underlying Teachable Machine video canvas handles viewport bounds */
+        #webcam-container canvas, #webcam-container video {
             width: 100% !important;
             height: 100% !important;
-            object-fit: cover;
+            object-fit: cover !important;
+            transform: scaleX(-1); /* Flips the mirror axis correctly */
             transition: filter 0.3s cubic-bezier(0.1, 1, 0.1, 1);
         }
 
@@ -55,7 +61,7 @@
             100% { filter: brightness(1) blur(0px) contrast(1); }
         }
 
-        /* Cinematic Overlay UI */
+        /* Cinematic Overlay UI Layer */
         .ui-layer {
             position: absolute;
             top: 0;
@@ -89,12 +95,12 @@
             background: var(--bg-glass);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            padding: 10px 20px;
+            padding: 12px 24px;
             border-radius: 40px;
             border: 1px solid var(--border-glass);
         }
 
-        /* Giant Floating Target HUD in the Center */
+        /* Floating Target HUD in the Center */
         .center-hud {
             position: absolute;
             top: 50%;
@@ -109,17 +115,18 @@
             gap: 1.5rem;
         }
 
-        /* Reticle corners */
+        /* Reticle design layout elements */
         .reticle {
             position: relative;
             width: 180px;
             height: 180px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.3s ease;
+            backdrop-filter: blur(2px);
         }
 
         .reticle::before {
@@ -145,7 +152,7 @@
             border: 1px solid var(--border-glass);
             padding: 1.5rem 3rem;
             border-radius: 20px;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
             transform: translateY(20px);
             opacity: 0;
             transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
@@ -172,7 +179,7 @@
             letter-spacing: 2px;
         }
 
-        /* Absolute Bottom Panel for Initialization */
+        /* Interaction triggers */
         .bottom-controls {
             display: flex;
             justify-content: center;
@@ -198,7 +205,6 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.5);
         }
 
-        /* Hidden breakdown drawer (accessible if someone needs debugging) */
         #label-container {
             display: none;
         }
@@ -216,8 +222,8 @@
     <div class="center-hud">
         <div class="reticle" id="hud-reticle"></div>
         <div class="active-prediction" id="prediction-card">
-            <div class="active-title" id="class-target">Scanning</div>
-            <div class="active-confidence" id="confidence-target">00% CONFIDENCE</div>
+            <div class="active-title" id="class-target">Initializing</div>
+            <div class="active-confidence" id="confidence-target">AWAITING SYSTEM</div>
         </div>
     </div>
 
@@ -226,7 +232,6 @@
     </div>
 </div>
 
-<!-- Hidden original tracking hook element required by original logic loops -->
 <div id="label-container"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
@@ -246,21 +251,25 @@
         model = await tmImage.load(modelURL, metadataURL);
         maxPredictions = model.getTotalClasses();
 
+        // FIXED: Reverted to matching standard capture aspects while allowing layout stretch scaling
         const flip = true; 
-        // Request higher baseline dimensions to scale smoothly across full monitor arrays
-        webcam = new tmImage.Webcam(640, 480, flip); 
+        webcam = new tmImage.Webcam(400, 400, flip); 
+        
         await webcam.setup(); 
         await webcam.play();
         
         window.requestAnimationFrame(loop);
-        document.getElementById("webcam-container").appendChild(webcam.canvas);
         
-        // Instant visual reveal transition trigger
+        // Target specific DOM injection handling cleanly
+        const container = document.getElementById("webcam-container");
+        container.innerHTML = ""; // Clear out styling artifact boundaries
+        container.appendChild(webcam.canvas);
+        
         document.getElementById("prediction-card").classList.add("show");
 
         await predict();
 
-        // The absolute 3-second heartbeat evaluation loop
+        // Execution snapshot loop (Interval ticks accurately every 3000ms)
         cameraInterval = setInterval(async () => {
             triggerShutterEffect();
             await predict();
@@ -273,6 +282,8 @@
     }
 
     async function predict() {
+        if (!model || !webcam) return;
+        
         const prediction = await model.predict(webcam.canvas);
         
         let highestIndex = 0;
@@ -287,15 +298,14 @@
         const nameTarget = prediction[highestIndex].className;
         const confidenceTarget = (prediction[highestIndex].probability * 100).toFixed(0);
 
-        // Render values instantly directly into the floating HUD elements
-        if (maxProp > 0.1) {
+        if (maxProp > 0.05) {
             document.getElementById("class-target").innerText = nameTarget;
             document.getElementById("confidence-target").innerText = `${confidenceTarget}% CONFIDENCE`;
             document.getElementById("hud-reticle").style.borderColor = "var(--neon)";
         } else {
-            document.getElementById("class-target").innerText = "Calibrating";
-            document.getElementById("confidence-target").innerText = "SEARCHING...";
-            document.getElementById("hud-reticle").style.borderColor = "rgba(255, 255, 255, 0.2)";
+            document.getElementById("class-target").innerText = "Scanning";
+            document.getElementById("confidence-target").innerText = "SEARCHING MATRIX...";
+            document.getElementById("hud-reticle").style.borderColor = "rgba(255, 255, 255, 0.15)";
         }
     }
 
