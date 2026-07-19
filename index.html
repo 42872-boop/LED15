@@ -3,267 +3,266 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teachable Machine | Premium Vision AI</title>
+    <title>CORTE X // AI Vision</title>
     <style>
         :root {
-            --bg-main: #06070d;
-            --bg-card: #0d0f19;
-            --accent-cyan: #00f2fe;
-            --accent-pink: #ff007f;
-            --accent-purple: #7000ff;
-            --text-main: #f0f3f8;
-            --text-muted: #6c7a9c;
-            --border-color: rgba(255, 255, 255, 0.06);
+            --bg: #030307;
+            --panel: #0b0c16;
+            --accent: #00ffaa;
+            --accent-dim: rgba(0, 255, 170, 0.15);
+            --text: #ffffff;
+            --text-muted: #4e5569;
+            --border: rgba(255, 255, 255, 0.05);
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            font-family: 'Courier New', Courier, monospace;
         }
 
         body {
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background-color: var(--bg-main);
-            color: var(--text-main);
+            background-color: var(--bg);
+            color: var(--text);
             display: flex;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            padding: 2rem 1rem;
-            letter-spacing: -0.01em;
+            padding: 2rem;
+            overflow-x: hidden;
         }
 
-        /* Subtle glowing mesh background effect */
+        /* Ambient HUD glow in the background */
         body::before {
             content: '';
             position: absolute;
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle, rgba(112, 0, 255, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
-            top: 10%;
-            left: 15%;
-            z-index: -1;
+            width: 80vw;
+            height: 80vh;
+            background: radial-gradient(circle, rgba(0, 255, 170, 0.03) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
         }
 
-        body::after {
-            content: '';
-            position: absolute;
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, rgba(0, 242, 254, 0.1) 0%, rgba(0, 0, 0, 0) 70%);
-            bottom: 10%;
-            right: 15%;
-            z-index: -1;
-        }
-
-        .dashboard {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 28px;
-            width: 100%;
-            max-width: 480px;
-            padding: 2.5rem;
-            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6), 
-                        inset 0 1px 1px rgba(255, 255, 255, 0.1);
+        .hud-container {
             position: relative;
-            overflow: hidden;
+            z-index: 1;
+            width: 100%;
+            max-width: 900px;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 2.5rem;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            padding: 3rem;
+            border-radius: 4px;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.8);
         }
 
-        header {
-            text-align: center;
-            margin-bottom: 2.5rem;
+        @media (max-width: 768px) {
+            .hud-container { grid-template-columns: 1fr; padding: 1.5rem; }
         }
 
-        header p {
-            font-size: 0.8rem;
+        /* Left Column: Camera and Deck */
+        .vision-core {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .hud-title {
+            font-size: 0.75rem;
+            letter-spacing: 4px;
+            color: var(--text-muted);
             text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--accent-cyan);
-            font-weight: 700;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.75rem;
             margin-bottom: 0.5rem;
         }
 
-        header h1 {
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: var(--text-main);
+        .hud-title span {
+            color: var(--accent);
+            float: right;
+            animation: blink 1s infinite steps(2);
         }
 
-        /* Action Controls */
-        .control-panel {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 2rem;
-        }
+        @keyframes blink { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
 
-        .btn-primary {
-            background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
-            color: #fff;
-            border: none;
-            padding: 14px 32px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            border-radius: 14px;
-            cursor: pointer;
-            box-shadow: 0 8px 24px rgba(255, 0, 127, 0.3);
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            width: 100%;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 28px rgba(255, 0, 127, 0.45);
-            filter: brightness(1.1);
-        }
-
-        .btn-primary:active {
-            transform: translateY(0);
-        }
-
-        /* Viewport Frame styling */
-        .viewport-wrapper {
+        /* Cinematic Camera Viewport */
+        .viewport {
             position: relative;
-            width: 280px;
-            height: 280px;
-            margin: 0 auto 2.5rem auto;
-            border-radius: 20px;
-            padding: 6px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
-            border: 1px solid var(--border-color);
-            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+            width: 100%;
+            aspect-ratio: 16 / 10;
+            background: #000;
+            border: 1px solid rgba(255,255,255,0.02);
+            overflow: hidden;
         }
+
+        /* High-tech corner target brackets */
+        .viewport::before, .viewport::after {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border: 2px solid var(--accent);
+            z-index: 3;
+            pointer-events: none;
+        }
+        .viewport::before { top: 10px; left: 10px; border-right: 0; border-bottom: 0; }
+        .viewport::after { bottom: 10px; right: 10px; border-left: 0; border-top: 0; }
 
         #webcam-container {
             width: 100%;
             height: 100%;
-            border-radius: 14px;
-            overflow: hidden;
-            position: relative;
-            background-color: #000;
         }
 
         #webcam-container canvas {
             width: 100% !important;
             height: 100% !important;
             object-fit: cover;
+            filter: grayscale(0.2) contrast(1.1);
+            transition: filter 0.2s ease;
         }
 
-        /* Cyberpunk scanline effect over live feed */
-        .scanline {
-            display: none;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
-            box-shadow: 0 0 10px var(--accent-cyan);
-            z-index: 2;
-            animation: scan 3s linear infinite;
+        /* Tactical 3-Second Flash Effect */
+        .capture-flash {
+            animation: flashOverlay 0.25s cubic-bezier(0.1, 1, 0.1, 1);
+        }
+        @keyframes flashOverlay {
+            0% { filter: brightness(3) contrast(1.5) saturate(2); }
+            100% { filter: grayscale(0.2) contrast(1.1); }
         }
 
-        @keyframes scan {
-            0% { top: 0%; opacity: 0; }
-            5% { opacity: 1; }
-            95% { opacity: 1; }
-            100% { top: 100%; opacity: 0; }
+        /* Glass Trigger Button */
+        .btn-hud {
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 18px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
 
-        /* Flash pulse indicator */
-        .flash-triggered {
-            animation: shutterFlash 0.3s ease-out;
+        .btn-hud:hover {
+            background: var(--accent);
+            color: var(--bg);
+            box-shadow: 0 0 20px rgba(0, 255, 170, 0.4);
         }
 
-        @keyframes shutterFlash {
-            0% { filter: brightness(2) contrast(0.8); }
-            100% { filter: brightness(1) contrast(1); }
+        /* Right Column: Tactical Data Blocks */
+        .data-stream {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
-        /* Output Metrics / Progress Rows */
         #label-container {
             display: flex;
             flex-direction: column;
-            gap: 1.25rem;
+            gap: 1.5rem;
         }
 
-        .metric-row {
-            display: flex;
-            flex-direction: column;
-            gap: 0.4rem;
+        .data-node {
+            border-left: 2px solid var(--text-muted);
+            padding-left: 1.25rem;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .metric-info {
+        .data-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: baseline;
+            margin-bottom: 0.5rem;
+        }
+
+        .data-tag {
             font-size: 0.85rem;
-            font-weight: 500;
-        }
-
-        .metric-label {
+            text-transform: uppercase;
             color: var(--text-muted);
-            transition: color 0.3s ease;
+            letter-spacing: 1px;
         }
 
-        .metric-value {
-            font-family: monospace;
-            font-weight: 700;
-            color: var(--text-main);
+        .data-output {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: rgba(255,255,255,0.3);
         }
 
-        .progress-track {
-            height: 6px;
+        /* Segmented Cyber Matrix Progress Bar */
+        .matrix-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.02);
+            position: relative;
             width: 100%;
-            background-color: rgba(255, 255, 255, 0.04);
-            border-radius: 10px;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.02);
         }
 
-        .progress-bar {
+        .matrix-fill {
             height: 100%;
             width: 0%;
             background: var(--text-muted);
-            border-radius: 10px;
-            transition: width 0.4s cubic-bezier(0.1, 0.8, 0.3, 1), background-color 0.4s ease;
+            transition: width 0.5s cubic-bezier(0.1, 0.8, 0.2, 1);
         }
 
-        /* Winning active class row styling */
-        .metric-row.active .metric-label {
-            color: #fff;
-            font-weight: 600;
+        /* Target State: When AI chooses this classification class */
+        .data-node.targeted {
+            border-left-color: var(--accent);
+        }
+        .data-node.targeted .data-tag {
+            color: var(--text);
+            font-weight: bold;
+        }
+        .data-node.targeted .data-output {
+            color: var(--accent);
+            text-shadow: 0 0 10px var(--accent-dim);
+        }
+        .data-node.targeted .matrix-fill {
+            background: linear-gradient(90deg, var(--accent), #00bfff);
+            box-shadow: 0 0 10px rgba(0, 255, 170, 0.5);
         }
 
-        .metric-row.active .metric-value {
-            color: var(--accent-cyan);
-            text-shadow: 0 0 10px rgba(0, 242, 254, 0.3);
-        }
-
-        .metric-row.active .progress-bar {
-            background: linear-gradient(90deg, var(--accent-purple), var(--accent-cyan));
-            box-shadow: 0 0 12px rgba(0, 242, 254, 0.4);
+        .system-status {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 2rem;
+            display: flex;
+            justify-content: space-between;
         }
     </style>
 </head>
 <body>
 
-<div class="dashboard">
-    <header>
-        <p>AI Inference Engine</p>
-        <h1>Vision Studio</h1>
-    </header>
-
-    <div class="control-panel">
-        <button type="button" class="btn-primary" id="start-btn" onclick="init()">Initialize System</button>
-    </div>
-    
-    <div class="viewport-wrapper">
-        <div class="scanline" id="scanline-element"></div>
-        <div id="webcam-container"></div>
+<div class="hud-container">
+    <!-- Camera Viewport Section -->
+    <div class="vision-core">
+        <div class="hud-title">System // Matrix_Feed <span>● LIVE</span></div>
+        <div class="viewport">
+            <div id="webcam-container"></div>
+        </div>
+        <button type="button" class="btn-hud" id="init-trigger" onclick="init()">Link Neural Engine</button>
     </div>
 
-    <div id="label-container"></div>
+    <!-- Live Data Visualization Section -->
+    <div class="data-stream">
+        <div>
+            <div class="hud-title">Inference // Output_Logs</div>
+            <div id="label-container">
+                <!-- Data feeds drop in dynamically here -->
+            </div>
+        </div>
+        
+        <div class="system-status">
+            <span>Freq: 0.33 Hz</span>
+            <span>Interval: 3.0s</span>
+        </div>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
@@ -272,11 +271,10 @@
     const URL = "./my_model/";
 
     let model, webcam, labelContainer, maxPredictions;
-    let cameraInterval;
+    let snapshotTimer;
 
     async function init() {
-        document.getElementById("start-btn").style.display = "none";
-        document.getElementById("scanline-element").style.display = "block";
+        document.getElementById("init-trigger").style.display = "none";
 
         const modelURL = URL + "model.json";
         const metadataURL = URL + "metadata.json";
@@ -284,8 +282,8 @@
         model = await tmImage.load(modelURL, metadataURL);
         maxPredictions = model.getTotalClasses();
 
-        const flip = true; 
-        webcam = new tmImage.Webcam(280, 280, flip); 
+        // 16:10 Cinematic aspect ratio resolution configuration
+        webcam = new tmImage.Webcam(400, 250, true); 
         await webcam.setup(); 
         await webcam.play();
         
@@ -294,28 +292,28 @@
         document.getElementById("webcam-container").appendChild(webcam.canvas);
         labelContainer = document.getElementById("label-container");
         
-        // Build empty structural layout elements for data presentation
+        // Setup minimalist UI nodes cleanly
         for (let i = 0; i < maxPredictions; i++) { 
-            let row = document.createElement("div");
-            row.className = "metric-row";
-            row.innerHTML = `
-                <div class="metric-info">
-                    <span class="metric-label">Analyzing...</span>
-                    <span class="metric-value">0%</span>
+            let node = document.createElement("div");
+            node.className = "data-node";
+            node.innerHTML = `
+                <div class="data-header">
+                    <span class="data-tag">Unlinked_Node</span>
+                    <span class="data-output">00%</span>
                 </div>
-                <div class="progress-track">
-                    <div class="progress-bar"></div>
+                <div class="matrix-bar">
+                    <div class="matrix-fill"></div>
                 </div>
             `;
-            labelContainer.appendChild(row);
+            labelContainer.appendChild(node);
         }
 
-        // Run an instant baseline prediction
+        // Fire initial evaluation sequence
         await predict();
 
-        // 3-second evaluation timer block
-        cameraInterval = setInterval(async () => {
-            triggerShutterEffect();
+        // Rigid 3000ms evaluation interval looping block
+        snapshotTimer = setInterval(async () => {
+            triggerHardwareFlash();
             await predict();
         }, 3000);
     }
@@ -328,45 +326,39 @@
     async function predict() {
         const prediction = await model.predict(webcam.canvas);
         
-        // Discover top performing object arrays
-        let highestIndex = 0;
-        let maxProp = 0;
+        let leadIndex = 0;
+        let maxVal = 0;
         for(let i=0; i<maxPredictions; i++) {
-            if(prediction[i].probability > maxProp) {
-                maxProp = prediction[i].probability;
-                highestIndex = i;
+            if(prediction[i].probability > maxVal) {
+                maxVal = prediction[i].probability;
+                leadIndex = i;
             }
         }
 
         for (let i = 0; i < maxPredictions; i++) {
-            const row = labelContainer.childNodes[i];
+            const node = labelContainer.childNodes[i];
             const name = prediction[i].className;
-            const rawProb = prediction[i].probability;
-            const percentageString = (rawProb * 100).toFixed(0) + "%";
+            const percentage = (prediction[i].probability * 100).toFixed(0);
             
-            // Inject targeted text components cleanly without destroying wrapper nodes
-            row.querySelector('.metric-label').innerText = name;
-            row.querySelector('.metric-value').innerText = percentageString;
-            
-            // Apply scale sizing constraints safely via percentage width assignments
-            const bar = row.querySelector('.progress-bar');
-            bar.style.width = (rawProb * 100) + "%";
+            node.querySelector('.data-tag').innerText = `[${i.toString().padStart(2, '0')}] ${name}`;
+            node.querySelector('.data-output').innerText = `${percentage.padStart(2, '0')}%`;
+            node.querySelector('.matrix-fill').style.width = percentage + "%";
 
-            // Toggle focus glow classes targeting high-performing index arrays
-            if(i === highestIndex && maxProp > 0.15) {
-                row.classList.add("active");
+            // Target lock highlighting
+            if(i === leadIndex && maxVal > 0.1) {
+                node.classList.add("targeted");
             } else {
-                row.classList.remove("active");
+                node.classList.remove("targeted");
             }
         }
     }
 
-    function triggerShutterEffect() {
-        const camCanvas = document.querySelector("#webcam-container canvas");
-        if(camCanvas) {
-            camCanvas.classList.remove("flash-triggered");
-            void camCanvas.offsetWidth; 
-            camCanvas.classList.add("flash-triggered");
+    function triggerHardwareFlash() {
+        const el = document.querySelector("#webcam-container canvas");
+        if(el) {
+            el.classList.remove("capture-flash");
+            void el.offsetWidth; 
+            el.classList.add("capture-flash");
         }
     }
 </script>
