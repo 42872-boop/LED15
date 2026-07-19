@@ -1,59 +1,259 @@
-<div>Teachable Machine Image Model</div>
-<button type="button" onclick="init()">Start</button>
-<div id="webcam-container"></div>
-<div id="label-container"></div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fabulous AI Vision</title>
+    <style>
+        :root {
+            --primary: #ff007f;
+            --secondary: #7000ff;
+            --bg: #0a051b;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --text: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg), #1a0b36);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .container {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2.5rem;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            text-align: center;
+            max-width: 450px;
+            width: 90%;
+            transition: all 0.3s ease;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(45deg, var(--primary), #00f2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .btn-grad {
+            background-image: linear-gradient(to right, var(--primary) 0%, var(--secondary) 51%, var(--primary) 100%);
+            padding: 15px 40px;
+            text-align: center;
+            text-transform: uppercase;
+            transition: 0.5s;
+            background-size: 200% auto;
+            color: white;            
+            box-shadow: 0 0 20px rgba(255, 0, 127, 0.3);
+            border-radius: 50px;
+            border: none;
+            font-weight: 700;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            margin-bottom: 2rem;
+        }
+
+        .btn-grad:hover {
+            background-position: right center;
+            color: #fff;
+            text-decoration: none;
+            box-shadow: 0 0 30px rgba(112, 0, 255, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .btn-grad:active {
+            transform: translateY(1px);
+        }
+
+        #webcam-container {
+            position: relative;
+            margin: 0 auto 2rem auto;
+            width: 240px;
+            height: 240px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 4px solid transparent;
+            background-image: linear-gradient(var(--bg), var(--bg)), linear-gradient(45deg, var(--primary), var(--secondary));
+            background-origin: border-box;
+            background-clip: padding-box, border-box;
+            box-shadow: 0 0 30px rgba(112, 0, 255, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #webcam-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        /* Flash animation overlay when prediction triggers every 3s */
+        .flash-active {
+            animation: cameraFlash 0.4s ease-out;
+        }
+
+        @keyframes cameraFlash {
+            0% { border-color: rgba(255, 255, 255, 1); box-shadow: 0 0 40px #fff; }
+            100% { border-color: transparent; }
+        }
+
+        #label-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            text-align: left;
+            margin-top: 1rem;
+        }
+
+        .prediction-bar {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .prediction-bar.highest {
+            background: linear-gradient(90deg, rgba(255, 0, 127, 0.15), rgba(112, 0, 255, 0.15));
+            border-color: rgba(255, 0, 127, 0.3);
+            box-shadow: 0 4px 15px rgba(255, 0, 127, 0.1);
+        }
+
+        .class-name {
+            color: #e0e0e0;
+        }
+
+        .class-prob {
+            font-family: monospace;
+            font-size: 1.1rem;
+            color: #00f2fe;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Teachable Vision</h1>
+    <button type="button" class="btn-grad" id="start-btn" onclick="init()">Launch Camera</button>
+    
+    <div id="webcam-container"></div>
+    <div id="label-container"></div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
 <script type="text/javascript">
-    // More API functions here:
-    // https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/image
-
-    // the link to your model provided by Teachable Machine export panel
+    // Your Teachable Machine model URL
     const URL = "./my_model/";
 
     let model, webcam, labelContainer, maxPredictions;
+    let cameraInterval;
 
-    // Load the image model and setup the webcam
     async function init() {
+        // Hide button or update UI upon initialization
+        document.getElementById("start-btn").style.display = "none";
+
         const modelURL = URL + "model.json";
         const metadataURL = URL + "metadata.json";
 
-        // load the model and metadata
-        // Refer to tmImage.loadFromFiles() in the API to support files from a file picker
-        // or files from your local hard drive
-        // Note: the pose library adds "tmImage" object to your window (window.tmImage)
         model = await tmImage.load(modelURL, metadataURL);
         maxPredictions = model.getTotalClasses();
 
-        // Convenience function to setup a webcam
-        const flip = true; // whether to flip the webcam
-        webcam = new tmImage.Webcam(200, 200, flip); // width, height, flip
-        await webcam.setup(); // request access to the webcam
+        const flip = true; 
+        // Bumping size slightly to 240 to look sharp in the rounded frame
+        webcam = new tmImage.Webcam(240, 240, flip); 
+        await webcam.setup(); 
         await webcam.play();
+        
+        // This keeps the webcam feed fluid and rendering smoothly
         window.requestAnimationFrame(loop);
 
-        // append elements to the DOM
         document.getElementById("webcam-container").appendChild(webcam.canvas);
         labelContainer = document.getElementById("label-container");
-        for (let i = 0; i < maxPredictions; i++) { // and class labels
-            labelContainer.appendChild(document.createElement("div"));
+        
+        // Build clear placeholders for the stylized prediction rows
+        for (let i = 0; i < maxPredictions; i++) { 
+            let row = document.createElement("div");
+            row.className = "prediction-bar";
+            row.innerHTML = `<span class="class-name">...</span><span class="class-prob">0.00</span>`;
+            labelContainer.appendChild(row);
         }
+
+        // Run an immediate initial prediction
+        await predict();
+
+        // 🎉 "Make the camera do its job every 3 seconds" 🎉
+        cameraInterval = setInterval(async () => {
+            triggerFlashEffect();
+            await predict();
+        }, 3000);
     }
 
     async function loop() {
-        webcam.update(); // update the webcam frame
-        await predict();
+        webcam.update(); // Keeps the video mirror running smoothly
         window.requestAnimationFrame(loop);
     }
 
-    // run the webcam image through the image model
     async function predict() {
-        // predict can take in an image, video or canvas html element
         const prediction = await model.predict(webcam.canvas);
+        
+        // Find the index of the highest probability to highlight it beautifully
+        let highestIndex = 0;
+        let maxProp = 0;
+        for(let i=0; i<maxPredictions; i++) {
+            if(prediction[i].probability > maxProp) {
+                maxProp = prediction[i].probability;
+                highestIndex = i;
+            }
+        }
+
         for (let i = 0; i < maxPredictions; i++) {
-            const classPrediction =
-                prediction[i].className + ": " + prediction[i].probability.toFixed(2);
-            labelContainer.childNodes[i].innerHTML = classPrediction;
+            const row = labelContainer.childNodes[i];
+            const name = prediction[i].className;
+            const probability = (prediction[i].probability * 100).toFixed(0) + "%"; // Percentages read cleaner!
+            
+            row.innerHTML = `<span class="class-name">${name}</span><span class="class-prob">${probability}</span>`;
+            
+            // Highlight the winning prediction category
+            if(i === highestIndex && maxProp > 0.1) {
+                row.classList.add("highest");
+            } else {
+                row.classList.remove("highest");
+            }
         }
     }
+
+    // Fun extra detail: gives a camera flash border style pulse every 3 seconds when evaluating
+    function triggerFlashEffect() {
+        const camBox = document.getElementById("webcam-container");
+        camBox.classList.remove("flash-active");
+        void camBox.offsetWidth; // Trigger reflow to restart animation smoothly
+        camBox.classList.add("flash-active");
+    }
 </script>
+
+</body>
+</html>
