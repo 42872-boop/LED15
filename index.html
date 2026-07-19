@@ -3,277 +3,261 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IMMERSE // CORE</title>
+    <title>NEXUS ENGINE // VISION AI</title>
     <style>
         :root {
-            --neon: #00f0ff;
-            --neon-dim: rgba(0, 240, 255, 0.2);
-            --bg-glass: rgba(6, 7, 13, 0.75);
-            --border-glass: rgba(255, 255, 255, 0.08);
+            --bg: #05060b;
+            --panel: #0b0d19;
+            --accent: #00f0ff;
+            --accent-glow: rgba(0, 240, 255, 0.2);
+            --text: #ffffff;
+            --text-muted: #525a70;
+            --border: rgba(255, 255, 255, 0.07);
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
         }
 
-        body, html {
-            background-color: #000;
-            color: #fff;
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 1.5rem;
+            letter-spacing: -0.01em;
+            background-image: radial-gradient(circle at 50% 30%, #111428 0%, var(--bg) 70%);
+        }
+
+        .main-frame {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 2.5rem;
             width: 100%;
-            height: 100%;
+            max-width: 460px;
+            box-shadow: 0 30px 70px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.1);
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 0.25rem;
+            background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--accent);
+            font-weight: 700;
+            margin-bottom: 2rem;
+        }
+
+        /* Camera Viewport Area */
+        .camera-deck {
+            position: relative;
+            width: 320px;
+            height: 320px;
+            margin: 0 auto 2rem auto;
+            background: #000;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             overflow: hidden;
         }
 
-        /* FIXED: Full Screen Webcam Wrapper allows elements to size contextually */
+        /* Enforce native styling constraints directly to preserve TM rendering loop */
         #webcam-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 1;
+            width: 320px;
+            height: 320px;
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: #020205;
         }
 
-        /* FIXED: Ensures the underlying Teachable Machine video canvas handles viewport bounds */
-        #webcam-container canvas, #webcam-container video {
-            width: 100% !important;
-            height: 100% !important;
-            object-fit: cover !important;
-            transform: scaleX(-1); /* Flips the mirror axis correctly */
-            transition: filter 0.3s cubic-bezier(0.1, 1, 0.1, 1);
+        #webcam-container canvas {
+            display: block !important;
+            border-radius: 16px;
+            width: 320px !important;
+            height: 320px !important;
+            object-fit: cover;
         }
 
-        /* Full-screen shutter snap effect */
-        .shutter-snap {
-            animation: shutter 0.4s ease-out forwards;
+        /* 3-Second Camera Flash Shutter Effect */
+        .shutter-flash {
+            animation: cameraFlash 0.35s ease-out forwards;
         }
 
-        @keyframes shutter {
-            0% { filter: brightness(4) blur(4px) contrast(1.5); }
-            40% { filter: brightness(0.2) blur(0px) contrast(2); }
-            100% { filter: brightness(1) blur(0px) contrast(1); }
+        @keyframes cameraFlash {
+            0% { filter: brightness(3) contrast(1.2); }
+            100% { filter: brightness(1) contrast(1); }
         }
 
-        /* Cinematic Overlay UI Layer */
-        .ui-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 2;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 2rem;
-            pointer-events: none;
-        }
-
-        .ui-layer * {
-            pointer-events: auto;
-        }
-
-        /* Top Bar Info */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .brand {
-            font-size: 0.75rem;
-            font-weight: 900;
-            letter-spacing: 5px;
-            text-transform: uppercase;
-            background: var(--bg-glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            padding: 12px 24px;
-            border-radius: 40px;
-            border: 1px solid var(--border-glass);
-        }
-
-        /* Floating Target HUD in the Center */
-        .center-hud {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            width: 90%;
-            max-width: 500px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        /* Reticle design layout elements */
-        .reticle {
-            position: relative;
-            width: 180px;
-            height: 180px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(2px);
-        }
-
-        .reticle::before {
-            content: '';
-            position: absolute;
-            width: 30px;
-            height: 30px;
-            border: 2px solid var(--neon);
-            border-radius: 50%;
-            box-shadow: 0 0 15px var(--neon-dim);
-            animation: pulse 1.5s infinite ease-in-out;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(0.8); opacity: 0.5; }
-            50% { transform: scale(1.2); opacity: 1; }
-        }
-
-        .active-prediction {
-            background: var(--bg-glass);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            border: 1px solid var(--border-glass);
-            padding: 1.5rem 3rem;
-            border-radius: 20px;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
-            transform: translateY(20px);
-            opacity: 0;
-            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .active-prediction.show {
-            transform: translateY(0);
-            opacity: 1;
-        }
-
-        .active-title {
-            font-size: 2rem;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            color: #fff;
-            margin-bottom: 0.25rem;
-            text-transform: capitalize;
-        }
-
-        .active-confidence {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--neon);
-            letter-spacing: 2px;
-        }
-
-        /* Interaction triggers */
-        .bottom-controls {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 1rem;
-        }
-
-        .btn-trigger {
+        /* Action Buttons */
+        .btn-action {
             background: #fff;
             color: #000;
             border: none;
-            padding: 18px 40px;
+            padding: 16px 36px;
             font-size: 0.9rem;
             font-weight: 700;
-            border-radius: 40px;
+            border-radius: 30px;
             cursor: pointer;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
-            transition: all 0.3s ease;
-            letter-spacing: 1px;
+            box-shadow: 0 10px 20px rgba(255,255,255,0.05);
+            transition: all 0.2s ease;
+            width: 100%;
         }
 
-        .btn-trigger:hover {
-            transform: scale(1.05);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px rgba(255,255,255,0.1);
         }
 
+        /* Modernized Data Feeds Rows */
         #label-container {
-            display: none;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            text-align: left;
+        }
+
+        .data-row {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255,255,255,0.03);
+            padding: 14px 18px;
+            border-radius: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .class-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .class-val {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.4);
+        }
+
+        /* Target Highlighted Mode */
+        .data-row.active {
+            background: rgba(0, 240, 255, 0.05);
+            border-color: rgba(0, 240, 255, 0.25);
+            box-shadow: 0 5px 15px rgba(0, 240, 255, 0.05);
+        }
+
+        .data-row.active .class-label {
+            color: #fff;
+        }
+
+        .data-row.active .class-val {
+            color: var(--accent);
+            text-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        #error-log {
+            color: #ff4a4a;
+            font-size: 0.85rem;
+            margin-top: 1rem;
+            font-family: monospace;
         }
     </style>
 </head>
 <body>
 
-<div id="webcam-container"></div>
-
-<div class="ui-layer">
+<div class="main-frame">
     <header>
-        <div class="brand">NEXUS // VISION</div>
+        <h1>NEXUS CORE</h1>
+        <p>Intelligence Engine</p>
     </header>
 
-    <div class="center-hud">
-        <div class="reticle" id="hud-reticle"></div>
-        <div class="active-prediction" id="prediction-card">
-            <div class="active-title" id="class-target">Initializing</div>
-            <div class="active-confidence" id="confidence-target">AWAITING SYSTEM</div>
+    <div class="camera-deck">
+        <div id="webcam-container">
+            <!-- Camera canvas appends explicitly right here safely -->
         </div>
     </div>
 
-    <div class="bottom-controls">
-        <button type="button" class="btn-trigger" id="start-btn" onclick="init()">START ENGINE</button>
-    </div>
+    <button type="button" class="btn-action" id="start-btn" onclick="init()">INITIALIZE CAMERA</button>
+    
+    <div id="label-container"></div>
+    <div id="error-log"></div>
 </div>
-
-<div id="label-container"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
 <script type="text/javascript">
-    const URL = "./my_model/";
+    const URL = "./my_model/"; // Ensure your Teachable Machine model folder matches this relative link location
 
-    let model, webcam, maxPredictions;
-    let cameraInterval;
+    let model, webcam, labelContainer, maxPredictions;
+    let mainInterval;
 
     async function init() {
-        document.getElementById("start-btn").style.display = "none";
-        
-        const modelURL = URL + "model.json";
-        const metadataURL = URL + "metadata.json";
+        const errorLog = document.getElementById("error-log");
+        errorLog.innerText = ""; 
 
-        model = await tmImage.load(modelURL, metadataURL);
-        maxPredictions = model.getTotalClasses();
+        try {
+            document.getElementById("start-btn").style.display = "none";
 
-        // FIXED: Reverted to matching standard capture aspects while allowing layout stretch scaling
-        const flip = true; 
-        webcam = new tmImage.Webcam(400, 400, flip); 
-        
-        await webcam.setup(); 
-        await webcam.play();
-        
-        window.requestAnimationFrame(loop);
-        
-        // Target specific DOM injection handling cleanly
-        const container = document.getElementById("webcam-container");
-        container.innerHTML = ""; // Clear out styling artifact boundaries
-        container.appendChild(webcam.canvas);
-        
-        document.getElementById("prediction-card").classList.add("show");
+            const modelURL = URL + "model.json";
+            const metadataURL = URL + "metadata.json";
 
-        await predict();
+            model = await tmImage.load(modelURL, metadataURL);
+            maxPredictions = model.getTotalClasses();
 
-        // Execution snapshot loop (Interval ticks accurately every 3000ms)
-        cameraInterval = setInterval(async () => {
-            triggerShutterEffect();
+            const flip = true; 
+            // FIXED: Standardizing webcam instantiation constraints perfectly to avoid library internal capture faults
+            webcam = new tmImage.Webcam(320, 320, flip); 
+            
+            await webcam.setup(); 
+            await webcam.play();
+            
+            window.requestAnimationFrame(loop);
+
+            labelContainer = document.getElementById("label-container");
+            labelContainer.innerHTML = ""; // Flush template elements out cleanly
+            
+            for (let i = 0; i < maxPredictions; i++) { 
+                let row = document.createElement("div");
+                row.className = "data-row";
+                row.innerHTML = `<span class="class-label">Analyzing...</span><span class="class-val">0%</span>`;
+                labelContainer.appendChild(row);
+            }
+
+            document.getElementById("webcam-container").appendChild(webcam.canvas);
+
+            // Instant initial snapshot execution step
             await predict();
-        }, 3000);
+
+            // Run structural prediction operations exactly every 3 seconds
+            mainInterval = setInterval(async () => {
+                triggerHardwarePulse();
+                await predict();
+            }, 3000);
+
+        } catch (err) {
+            console.error(err);
+            errorLog.innerText = "SYSTEM ERROR: " + err.message + "\nCheck camera permissions or secure context (HTTPS/Localhost).";
+            document.getElementById("start-btn").style.display = "block";
+        }
     }
 
     async function loop() {
@@ -286,35 +270,39 @@
         
         const prediction = await model.predict(webcam.canvas);
         
-        let highestIndex = 0;
-        let maxProp = 0;
-        for(let i=0; i<maxPredictions; i++) {
-            if(prediction[i].probability > maxProp) {
-                maxProp = prediction[i].probability;
-                highestIndex = i;
+        let leadIndex = 0;
+        let maxVal = 0;
+        for(let i = 0; i < maxPredictions; i++) {
+            if(prediction[i].probability > maxVal) {
+                maxVal = prediction[i].probability;
+                leadIndex = i;
             }
         }
 
-        const nameTarget = prediction[highestIndex].className;
-        const confidenceTarget = (prediction[highestIndex].probability * 100).toFixed(0);
+        for (let i = 0; i < maxPredictions; i++) {
+            const row = labelContainer.childNodes[i];
+            if (!row) continue;
+            
+            const name = prediction[i].className;
+            const score = (prediction[i].probability * 100).toFixed(0) + "%";
+            
+            row.querySelector('.class-label').innerText = name;
+            row.querySelector('.class-val').innerText = score;
 
-        if (maxProp > 0.05) {
-            document.getElementById("class-target").innerText = nameTarget;
-            document.getElementById("confidence-target").innerText = `${confidenceTarget}% CONFIDENCE`;
-            document.getElementById("hud-reticle").style.borderColor = "var(--neon)";
-        } else {
-            document.getElementById("class-target").innerText = "Scanning";
-            document.getElementById("confidence-target").innerText = "SEARCHING MATRIX...";
-            document.getElementById("hud-reticle").style.borderColor = "rgba(255, 255, 255, 0.15)";
+            if(i === leadIndex && maxVal > 0.1) {
+                row.classList.add("active");
+            } else {
+                row.classList.remove("active");
+            }
         }
     }
 
-    function triggerShutterEffect() {
-        const targetCanvas = document.querySelector("#webcam-container canvas");
-        if(targetCanvas) {
-            targetCanvas.classList.remove("shutter-snap");
-            void targetCanvas.offsetWidth; 
-            targetCanvas.classList.add("shutter-snap");
+    function triggerHardwarePulse() {
+        const target = document.querySelector("#webcam-container canvas");
+        if(target) {
+            target.classList.remove("shutter-flash");
+            void target.offsetWidth; 
+            target.classList.add("shutter-flash");
         }
     }
 </script>
