@@ -3,178 +3,280 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fabulous AI Vision</title>
+    <title>Teachable Machine | Premium Vision AI</title>
     <style>
         :root {
-            --primary: #ff007f;
-            --secondary: #7000ff;
-            --bg: #0a051b;
-            --card-bg: rgba(255, 255, 255, 0.05);
-            --text: #ffffff;
+            --bg-main: #06070d;
+            --bg-card: #0d0f19;
+            --accent-cyan: #00f2fe;
+            --accent-pink: #ff007f;
+            --accent-purple: #7000ff;
+            --text-main: #f0f3f8;
+            --text-muted: #6c7a9c;
+            --border-color: rgba(255, 255, 255, 0.06);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, var(--bg), #1a0b36);
-            color: var(--text);
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            margin: 0;
-            overflow-x: hidden;
+            padding: 2rem 1rem;
+            letter-spacing: -0.01em;
         }
 
-        .container {
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        /* Subtle glowing mesh background effect */
+        body::before {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(112, 0, 255, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+            top: 10%;
+            left: 15%;
+            z-index: -1;
+        }
+
+        body::after {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(0, 242, 254, 0.1) 0%, rgba(0, 0, 0, 0) 70%);
+            bottom: 10%;
+            right: 15%;
+            z-index: -1;
+        }
+
+        .dashboard {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 28px;
+            width: 100%;
+            max-width: 480px;
             padding: 2.5rem;
-            border-radius: 24px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            text-align: center;
-            max-width: 450px;
-            width: 90%;
-            transition: all 0.3s ease;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6), 
+                        inset 0 1px 1px rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
         }
 
-        h1 {
-            font-size: 2.2rem;
-            font-weight: 800;
-            margin-top: 0;
-            margin-bottom: 1.5rem;
-            background: linear-gradient(45deg, var(--primary), #00f2fe);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: -0.5px;
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
         }
 
-        .btn-grad {
-            background-image: linear-gradient(to right, var(--primary) 0%, var(--secondary) 51%, var(--primary) 100%);
-            padding: 15px 40px;
-            text-align: center;
+        header p {
+            font-size: 0.8rem;
             text-transform: uppercase;
-            transition: 0.5s;
-            background-size: 200% auto;
-            color: white;            
-            box-shadow: 0 0 20px rgba(255, 0, 127, 0.3);
-            border-radius: 50px;
-            border: none;
+            letter-spacing: 2px;
+            color: var(--accent-cyan);
             font-weight: 700;
-            font-size: 0.9rem;
-            letter-spacing: 1px;
-            cursor: pointer;
+            margin-bottom: 0.5rem;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        /* Action Controls */
+        .control-panel {
+            display: flex;
+            justify-content: center;
             margin-bottom: 2rem;
         }
 
-        .btn-grad:hover {
-            background-position: right center;
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
             color: #fff;
-            text-decoration: none;
-            box-shadow: 0 0 30px rgba(112, 0, 255, 0.5);
-            transform: translateY(-2px);
+            border: none;
+            padding: 14px 32px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 14px;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(255, 0, 127, 0.3);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
         }
-        
-        .btn-grad:active {
-            transform: translateY(1px);
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(255, 0, 127, 0.45);
+            filter: brightness(1.1);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        /* Viewport Frame styling */
+        .viewport-wrapper {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            margin: 0 auto 2.5rem auto;
+            border-radius: 20px;
+            padding: 6px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
+            border: 1px solid var(--border-color);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
         }
 
         #webcam-container {
-            position: relative;
-            margin: 0 auto 2rem auto;
-            width: 240px;
-            height: 240px;
-            border-radius: 50%;
+            width: 100%;
+            height: 100%;
+            border-radius: 14px;
             overflow: hidden;
-            border: 4px solid transparent;
-            background-image: linear-gradient(var(--bg), var(--bg)), linear-gradient(45deg, var(--primary), var(--secondary));
-            background-origin: border-box;
-            background-clip: padding-box, border-box;
-            box-shadow: 0 0 30px rgba(112, 0, 255, 0.2);
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            position: relative;
+            background-color: #000;
         }
 
         #webcam-container canvas {
             width: 100% !important;
             height: 100% !important;
             object-fit: cover;
-            border-radius: 50%;
         }
 
-        /* Flash animation overlay when prediction triggers every 3s */
-        .flash-active {
-            animation: cameraFlash 0.4s ease-out;
+        /* Cyberpunk scanline effect over live feed */
+        .scanline {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+            box-shadow: 0 0 10px var(--accent-cyan);
+            z-index: 2;
+            animation: scan 3s linear infinite;
         }
 
-        @keyframes cameraFlash {
-            0% { border-color: rgba(255, 255, 255, 1); box-shadow: 0 0 40px #fff; }
-            100% { border-color: transparent; }
+        @keyframes scan {
+            0% { top: 0%; opacity: 0; }
+            5% { opacity: 1; }
+            95% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
         }
 
+        /* Flash pulse indicator */
+        .flash-triggered {
+            animation: shutterFlash 0.3s ease-out;
+        }
+
+        @keyframes shutterFlash {
+            0% { filter: brightness(2) contrast(0.8); }
+            100% { filter: brightness(1) contrast(1); }
+        }
+
+        /* Output Metrics / Progress Rows */
         #label-container {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            text-align: left;
-            margin-top: 1rem;
+            gap: 1.25rem;
         }
 
-        .prediction-bar {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 12px 16px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+        .metric-row {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .metric-info {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            font-size: 0.85rem;
             font-weight: 500;
-            transition: all 0.3s ease;
         }
 
-        .prediction-bar.highest {
-            background: linear-gradient(90deg, rgba(255, 0, 127, 0.15), rgba(112, 0, 255, 0.15));
-            border-color: rgba(255, 0, 127, 0.3);
-            box-shadow: 0 4px 15px rgba(255, 0, 127, 0.1);
+        .metric-label {
+            color: var(--text-muted);
+            transition: color 0.3s ease;
         }
 
-        .class-name {
-            color: #e0e0e0;
-        }
-
-        .class-prob {
+        .metric-value {
             font-family: monospace;
-            font-size: 1.1rem;
-            color: #00f2fe;
-            font-weight: bold;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .progress-track {
+            height: 6px;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.04);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.02);
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--text-muted);
+            border-radius: 10px;
+            transition: width 0.4s cubic-bezier(0.1, 0.8, 0.3, 1), background-color 0.4s ease;
+        }
+
+        /* Winning active class row styling */
+        .metric-row.active .metric-label {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .metric-row.active .metric-value {
+            color: var(--accent-cyan);
+            text-shadow: 0 0 10px rgba(0, 242, 254, 0.3);
+        }
+
+        .metric-row.active .progress-bar {
+            background: linear-gradient(90deg, var(--accent-purple), var(--accent-cyan));
+            box-shadow: 0 0 12px rgba(0, 242, 254, 0.4);
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>Teachable Vision</h1>
-    <button type="button" class="btn-grad" id="start-btn" onclick="init()">Launch Camera</button>
+<div class="dashboard">
+    <header>
+        <p>AI Inference Engine</p>
+        <h1>Vision Studio</h1>
+    </header>
+
+    <div class="control-panel">
+        <button type="button" class="btn-primary" id="start-btn" onclick="init()">Initialize System</button>
+    </div>
     
-    <div id="webcam-container"></div>
+    <div class="viewport-wrapper">
+        <div class="scanline" id="scanline-element"></div>
+        <div id="webcam-container"></div>
+    </div>
+
     <div id="label-container"></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
 <script type="text/javascript">
-    // Your Teachable Machine model URL
     const URL = "./my_model/";
 
     let model, webcam, labelContainer, maxPredictions;
     let cameraInterval;
 
     async function init() {
-        // Hide button or update UI upon initialization
         document.getElementById("start-btn").style.display = "none";
+        document.getElementById("scanline-element").style.display = "block";
 
         const modelURL = URL + "model.json";
         const metadataURL = URL + "metadata.json";
@@ -183,44 +285,50 @@
         maxPredictions = model.getTotalClasses();
 
         const flip = true; 
-        // Bumping size slightly to 240 to look sharp in the rounded frame
-        webcam = new tmImage.Webcam(240, 240, flip); 
+        webcam = new tmImage.Webcam(280, 280, flip); 
         await webcam.setup(); 
         await webcam.play();
         
-        // This keeps the webcam feed fluid and rendering smoothly
         window.requestAnimationFrame(loop);
 
         document.getElementById("webcam-container").appendChild(webcam.canvas);
         labelContainer = document.getElementById("label-container");
         
-        // Build clear placeholders for the stylized prediction rows
+        // Build empty structural layout elements for data presentation
         for (let i = 0; i < maxPredictions; i++) { 
             let row = document.createElement("div");
-            row.className = "prediction-bar";
-            row.innerHTML = `<span class="class-name">...</span><span class="class-prob">0.00</span>`;
+            row.className = "metric-row";
+            row.innerHTML = `
+                <div class="metric-info">
+                    <span class="metric-label">Analyzing...</span>
+                    <span class="metric-value">0%</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-bar"></div>
+                </div>
+            `;
             labelContainer.appendChild(row);
         }
 
-        // Run an immediate initial prediction
+        // Run an instant baseline prediction
         await predict();
 
-        // 🎉 "Make the camera do its job every 3 seconds" 🎉
+        // 3-second evaluation timer block
         cameraInterval = setInterval(async () => {
-            triggerFlashEffect();
+            triggerShutterEffect();
             await predict();
         }, 3000);
     }
 
     async function loop() {
-        webcam.update(); // Keeps the video mirror running smoothly
+        webcam.update(); 
         window.requestAnimationFrame(loop);
     }
 
     async function predict() {
         const prediction = await model.predict(webcam.canvas);
         
-        // Find the index of the highest probability to highlight it beautifully
+        // Discover top performing object arrays
         let highestIndex = 0;
         let maxProp = 0;
         for(let i=0; i<maxPredictions; i++) {
@@ -233,25 +341,33 @@
         for (let i = 0; i < maxPredictions; i++) {
             const row = labelContainer.childNodes[i];
             const name = prediction[i].className;
-            const probability = (prediction[i].probability * 100).toFixed(0) + "%"; // Percentages read cleaner!
+            const rawProb = prediction[i].probability;
+            const percentageString = (rawProb * 100).toFixed(0) + "%";
             
-            row.innerHTML = `<span class="class-name">${name}</span><span class="class-prob">${probability}</span>`;
+            // Inject targeted text components cleanly without destroying wrapper nodes
+            row.querySelector('.metric-label').innerText = name;
+            row.querySelector('.metric-value').innerText = percentageString;
             
-            // Highlight the winning prediction category
-            if(i === highestIndex && maxProp > 0.1) {
-                row.classList.add("highest");
+            // Apply scale sizing constraints safely via percentage width assignments
+            const bar = row.querySelector('.progress-bar');
+            bar.style.width = (rawProb * 100) + "%";
+
+            // Toggle focus glow classes targeting high-performing index arrays
+            if(i === highestIndex && maxProp > 0.15) {
+                row.classList.add("active");
             } else {
-                row.classList.remove("highest");
+                row.classList.remove("active");
             }
         }
     }
 
-    // Fun extra detail: gives a camera flash border style pulse every 3 seconds when evaluating
-    function triggerFlashEffect() {
-        const camBox = document.getElementById("webcam-container");
-        camBox.classList.remove("flash-active");
-        void camBox.offsetWidth; // Trigger reflow to restart animation smoothly
-        camBox.classList.add("flash-active");
+    function triggerShutterEffect() {
+        const camCanvas = document.querySelector("#webcam-container canvas");
+        if(camCanvas) {
+            camCanvas.classList.remove("flash-triggered");
+            void camCanvas.offsetWidth; 
+            camCanvas.classList.add("flash-triggered");
+        }
     }
 </script>
 
