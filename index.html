@@ -3,317 +3,266 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CORTE X // AI Vision</title>
+    <title>IMMERSE // CORE</title>
     <style>
         :root {
-            --bg: #030307;
-            --panel: #0b0c16;
-            --accent: #00ffaa;
-            --accent-dim: rgba(0, 255, 170, 0.15);
-            --text: #ffffff;
-            --text-muted: #4e5569;
-            --border: rgba(255, 255, 255, 0.05);
+            --neon: #00f0ff;
+            --neon-dim: rgba(0, 240, 255, 0.2);
+            --bg-glass: rgba(6, 7, 13, 0.6);
+            --border-glass: rgba(255, 255, 255, 0.08);
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Courier New', Courier, monospace;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
 
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 2rem;
-            overflow-x: hidden;
-        }
-
-        /* Ambient HUD glow in the background */
-        body::before {
-            content: '';
-            position: absolute;
-            width: 80vw;
-            height: 80vh;
-            background: radial-gradient(circle, rgba(0, 255, 170, 0.03) 0%, transparent 70%);
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .hud-container {
-            position: relative;
-            z-index: 1;
+        body, html {
+            background-color: #000;
+            color: #fff;
             width: 100%;
-            max-width: 900px;
-            display: grid;
-            grid-template-columns: 1.2fr 1fr;
-            gap: 2.5rem;
-            background: var(--panel);
-            border: 1px solid var(--border);
-            padding: 3rem;
-            border-radius: 4px;
-            box-shadow: 0 40px 100px rgba(0,0,0,0.8);
-        }
-
-        @media (max-width: 768px) {
-            .hud-container { grid-template-columns: 1fr; padding: 1.5rem; }
-        }
-
-        /* Left Column: Camera and Deck */
-        .vision-core {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-
-        .hud-title {
-            font-size: 0.75rem;
-            letter-spacing: 4px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 0.75rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .hud-title span {
-            color: var(--accent);
-            float: right;
-            animation: blink 1s infinite steps(2);
-        }
-
-        @keyframes blink { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
-
-        /* Cinematic Camera Viewport */
-        .viewport {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 16 / 10;
-            background: #000;
-            border: 1px solid rgba(255,255,255,0.02);
+            height: 100%;
             overflow: hidden;
         }
 
-        /* High-tech corner target brackets */
-        .viewport::before, .viewport::after {
-            content: '';
-            position: absolute;
-            width: 12px;
-            height: 12px;
-            border: 2px solid var(--accent);
-            z-index: 3;
-            pointer-events: none;
-        }
-        .viewport::before { top: 10px; left: 10px; border-right: 0; border-bottom: 0; }
-        .viewport::after { bottom: 10px; right: 10px; border-left: 0; border-top: 0; }
-
+        /* Full Screen Webcam Wrapper */
         #webcam-container {
-            width: 100%;
-            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
         }
 
         #webcam-container canvas {
             width: 100% !important;
             height: 100% !important;
             object-fit: cover;
-            filter: grayscale(0.2) contrast(1.1);
-            transition: filter 0.2s ease;
+            transition: filter 0.3s cubic-bezier(0.1, 1, 0.1, 1);
         }
 
-        /* Tactical 3-Second Flash Effect */
-        .capture-flash {
-            animation: flashOverlay 0.25s cubic-bezier(0.1, 1, 0.1, 1);
-        }
-        @keyframes flashOverlay {
-            0% { filter: brightness(3) contrast(1.5) saturate(2); }
-            100% { filter: grayscale(0.2) contrast(1.1); }
+        /* Full-screen shutter snap effect */
+        .shutter-snap {
+            animation: shutter 0.4s ease-out forwards;
         }
 
-        /* Glass Trigger Button */
-        .btn-hud {
-            background: transparent;
-            border: 1px solid var(--accent);
-            color: var(--accent);
-            padding: 18px;
-            font-size: 0.85rem;
-            font-weight: bold;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
+        @keyframes shutter {
+            0% { filter: brightness(4) blur(4px) contrast(1.5); }
+            40% { filter: brightness(0.2) blur(0px) contrast(2); }
+            100% { filter: brightness(1) blur(0px) contrast(1); }
         }
 
-        .btn-hud:hover {
-            background: var(--accent);
-            color: var(--bg);
-            box-shadow: 0 0 20px rgba(0, 255, 170, 0.4);
-        }
-
-        /* Right Column: Tactical Data Blocks */
-        .data-stream {
+        /* Cinematic Overlay UI */
+        .ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            padding: 2rem;
+            pointer-events: none;
         }
 
-        #label-container {
+        .ui-layer * {
+            pointer-events: auto;
+        }
+
+        /* Top Bar Info */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand {
+            font-size: 0.75rem;
+            font-weight: 900;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 10px 20px;
+            border-radius: 40px;
+            border: 1px solid var(--border-glass);
+        }
+
+        /* Giant Floating Target HUD in the Center */
+        .center-hud {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            width: 90%;
+            max-width: 500px;
             display: flex;
             flex-direction: column;
+            align-items: center;
             gap: 1.5rem;
         }
 
-        .data-node {
-            border-left: 2px solid var(--text-muted);
-            padding-left: 1.25rem;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .data-header {
+        /* Reticle corners */
+        .reticle {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
             display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            margin-bottom: 0.5rem;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
         }
 
-        .data-tag {
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            color: var(--text-muted);
+        .reticle::before {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border: 2px solid var(--neon);
+            border-radius: 50%;
+            box-shadow: 0 0 15px var(--neon-dim);
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(0.8); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 1; }
+        }
+
+        .active-prediction {
+            background: var(--bg-glass);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid var(--border-glass);
+            padding: 1.5rem 3rem;
+            border-radius: 20px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .active-prediction.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .active-title {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: #fff;
+            margin-bottom: 0.25rem;
+            text-transform: capitalize;
+        }
+
+        .active-confidence {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--neon);
+            letter-spacing: 2px;
+        }
+
+        /* Absolute Bottom Panel for Initialization */
+        .bottom-controls {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .btn-trigger {
+            background: #fff;
+            color: #000;
+            border: none;
+            padding: 18px 40px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            border-radius: 40px;
+            cursor: pointer;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
             letter-spacing: 1px;
         }
 
-        .data-output {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: rgba(255,255,255,0.3);
+        .btn-trigger:hover {
+            transform: scale(1.05);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
         }
 
-        /* Segmented Cyber Matrix Progress Bar */
-        .matrix-bar {
-            height: 8px;
-            background: rgba(255, 255, 255, 0.02);
-            position: relative;
-            width: 100%;
-        }
-
-        .matrix-fill {
-            height: 100%;
-            width: 0%;
-            background: var(--text-muted);
-            transition: width 0.5s cubic-bezier(0.1, 0.8, 0.2, 1);
-        }
-
-        /* Target State: When AI chooses this classification class */
-        .data-node.targeted {
-            border-left-color: var(--accent);
-        }
-        .data-node.targeted .data-tag {
-            color: var(--text);
-            font-weight: bold;
-        }
-        .data-node.targeted .data-output {
-            color: var(--accent);
-            text-shadow: 0 0 10px var(--accent-dim);
-        }
-        .data-node.targeted .matrix-fill {
-            background: linear-gradient(90deg, var(--accent), #00bfff);
-            box-shadow: 0 0 10px rgba(0, 255, 170, 0.5);
-        }
-
-        .system-status {
-            font-size: 0.65rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-top: 2rem;
-            display: flex;
-            justify-content: space-between;
+        /* Hidden breakdown drawer (accessible if someone needs debugging) */
+        #label-container {
+            display: none;
         }
     </style>
 </head>
 <body>
 
-<div class="hud-container">
-    <!-- Camera Viewport Section -->
-    <div class="vision-core">
-        <div class="hud-title">System // Matrix_Feed <span>● LIVE</span></div>
-        <div class="viewport">
-            <div id="webcam-container"></div>
+<div id="webcam-container"></div>
+
+<div class="ui-layer">
+    <header>
+        <div class="brand">NEXUS // VISION</div>
+    </header>
+
+    <div class="center-hud">
+        <div class="reticle" id="hud-reticle"></div>
+        <div class="active-prediction" id="prediction-card">
+            <div class="active-title" id="class-target">Scanning</div>
+            <div class="active-confidence" id="confidence-target">00% CONFIDENCE</div>
         </div>
-        <button type="button" class="btn-hud" id="init-trigger" onclick="init()">Link Neural Engine</button>
     </div>
 
-    <!-- Live Data Visualization Section -->
-    <div class="data-stream">
-        <div>
-            <div class="hud-title">Inference // Output_Logs</div>
-            <div id="label-container">
-                <!-- Data feeds drop in dynamically here -->
-            </div>
-        </div>
-        
-        <div class="system-status">
-            <span>Freq: 0.33 Hz</span>
-            <span>Interval: 3.0s</span>
-        </div>
+    <div class="bottom-controls">
+        <button type="button" class="btn-trigger" id="start-btn" onclick="init()">START ENGINE</button>
     </div>
 </div>
+
+<!-- Hidden original tracking hook element required by original logic loops -->
+<div id="label-container"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
 <script type="text/javascript">
     const URL = "./my_model/";
 
-    let model, webcam, labelContainer, maxPredictions;
-    let snapshotTimer;
+    let model, webcam, maxPredictions;
+    let cameraInterval;
 
     async function init() {
-        document.getElementById("init-trigger").style.display = "none";
-
+        document.getElementById("start-btn").style.display = "none";
+        
         const modelURL = URL + "model.json";
         const metadataURL = URL + "metadata.json";
 
         model = await tmImage.load(modelURL, metadataURL);
         maxPredictions = model.getTotalClasses();
 
-        // 16:10 Cinematic aspect ratio resolution configuration
-        webcam = new tmImage.Webcam(400, 250, true); 
+        const flip = true; 
+        // Request higher baseline dimensions to scale smoothly across full monitor arrays
+        webcam = new tmImage.Webcam(640, 480, flip); 
         await webcam.setup(); 
         await webcam.play();
         
         window.requestAnimationFrame(loop);
-
         document.getElementById("webcam-container").appendChild(webcam.canvas);
-        labelContainer = document.getElementById("label-container");
         
-        // Setup minimalist UI nodes cleanly
-        for (let i = 0; i < maxPredictions; i++) { 
-            let node = document.createElement("div");
-            node.className = "data-node";
-            node.innerHTML = `
-                <div class="data-header">
-                    <span class="data-tag">Unlinked_Node</span>
-                    <span class="data-output">00%</span>
-                </div>
-                <div class="matrix-bar">
-                    <div class="matrix-fill"></div>
-                </div>
-            `;
-            labelContainer.appendChild(node);
-        }
+        // Instant visual reveal transition trigger
+        document.getElementById("prediction-card").classList.add("show");
 
-        // Fire initial evaluation sequence
         await predict();
 
-        // Rigid 3000ms evaluation interval looping block
-        snapshotTimer = setInterval(async () => {
-            triggerHardwareFlash();
+        // The absolute 3-second heartbeat evaluation loop
+        cameraInterval = setInterval(async () => {
+            triggerShutterEffect();
             await predict();
         }, 3000);
     }
@@ -326,39 +275,36 @@
     async function predict() {
         const prediction = await model.predict(webcam.canvas);
         
-        let leadIndex = 0;
-        let maxVal = 0;
+        let highestIndex = 0;
+        let maxProp = 0;
         for(let i=0; i<maxPredictions; i++) {
-            if(prediction[i].probability > maxVal) {
-                maxVal = prediction[i].probability;
-                leadIndex = i;
+            if(prediction[i].probability > maxProp) {
+                maxProp = prediction[i].probability;
+                highestIndex = i;
             }
         }
 
-        for (let i = 0; i < maxPredictions; i++) {
-            const node = labelContainer.childNodes[i];
-            const name = prediction[i].className;
-            const percentage = (prediction[i].probability * 100).toFixed(0);
-            
-            node.querySelector('.data-tag').innerText = `[${i.toString().padStart(2, '0')}] ${name}`;
-            node.querySelector('.data-output').innerText = `${percentage.padStart(2, '0')}%`;
-            node.querySelector('.matrix-fill').style.width = percentage + "%";
+        const nameTarget = prediction[highestIndex].className;
+        const confidenceTarget = (prediction[highestIndex].probability * 100).toFixed(0);
 
-            // Target lock highlighting
-            if(i === leadIndex && maxVal > 0.1) {
-                node.classList.add("targeted");
-            } else {
-                node.classList.remove("targeted");
-            }
+        // Render values instantly directly into the floating HUD elements
+        if (maxProp > 0.1) {
+            document.getElementById("class-target").innerText = nameTarget;
+            document.getElementById("confidence-target").innerText = `${confidenceTarget}% CONFIDENCE`;
+            document.getElementById("hud-reticle").style.borderColor = "var(--neon)";
+        } else {
+            document.getElementById("class-target").innerText = "Calibrating";
+            document.getElementById("confidence-target").innerText = "SEARCHING...";
+            document.getElementById("hud-reticle").style.borderColor = "rgba(255, 255, 255, 0.2)";
         }
     }
 
-    function triggerHardwareFlash() {
-        const el = document.querySelector("#webcam-container canvas");
-        if(el) {
-            el.classList.remove("capture-flash");
-            void el.offsetWidth; 
-            el.classList.add("capture-flash");
+    function triggerShutterEffect() {
+        const targetCanvas = document.querySelector("#webcam-container canvas");
+        if(targetCanvas) {
+            targetCanvas.classList.remove("shutter-snap");
+            void targetCanvas.offsetWidth; 
+            targetCanvas.classList.add("shutter-snap");
         }
     }
 </script>
